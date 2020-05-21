@@ -1,0 +1,125 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct books{
+    char* num;
+    char* author;
+    char* title;
+    char* qf;
+    char* qt;
+};
+int quantity(FILE*);
+
+char* scan(int*, FILE*);
+
+struct books* input(struct books*, FILE*);
+
+void show(struct books*, int);
+
+char* scan_console();
+
+void input_file(int, FILE*, struct books*);
+
+int main()
+{
+    int v;
+    FILE* file = fopen("books.csv", "a+");
+    printf("Choose an option :\n");
+    printf("1. Show all books\n");
+    printf("2. Add a book\n");
+    scanf("%d", &v);
+    int digit;
+    struct books *book = malloc(1 * sizeof(struct books));
+    digit = quantity(file);
+    book = input(book, file);
+    if (v == 1) {
+        show(book, digit);
+        fclose(file);
+    }
+    if (v == 2){
+        int check = 0;
+        printf("Input book info:\n");
+        book = realloc(book, (digit + 1) * sizeof(struct books));
+        getchar();
+        book[digit + 1].num = scan_console(&check);
+        book[digit + 1].author = scan_console(&check);
+        book[digit + 1].title = scan_console(&check);
+        book[digit + 1].qf = scan_console(&check);
+        book[digit + 1].qt = scan_console(&check);
+        input_file(digit + 1, file, book);
+    }
+    return 0;
+}
+
+int quantity(FILE* fp){
+    int n = 1;
+    char c = fgetc(fp);
+    while (c != EOF){
+        if (c == '\n') n++;
+        c = fgetc(fp);
+    }
+    rewind(fp);
+    return(n);
+}
+
+struct books* input(struct books* book, FILE* fp)
+{
+    int n = 0;
+    int checker = 0;
+    while (checker != 1)
+    {
+        book[n].num = scan(&checker, fp);
+        book[n].author = scan(&checker, fp);
+        book[n].title = scan(&checker, fp);
+        book[n].qf = scan(&checker, fp);
+        book[n].qt = scan(&checker, fp);
+        n++;
+        book = realloc(book, (n + 1) * sizeof(struct books));
+    }
+    return book;
+}
+
+char* scan(int* checker, FILE* fp)
+{
+    int n = 1;
+    int i = 0;
+    char c;
+    char* str = malloc(1 * sizeof(char));
+    while ((c = getc(fp)) != ';' && c != '\n' && c != EOF)
+    {
+        *(str + i) = c;
+        i += 1;
+        str = realloc(str, (i + 1) * sizeof(char));
+    }
+    *(str + i) = '\0';
+    if (c == EOF)
+        *checker = 1;
+    return str;
+}
+
+void show(struct books* book, int n)
+{
+    for (int i = 0; i < n; ++i)
+    {
+        printf("%s %s %s %s %s\n", book[i].num, book[i].author, book[i].title, book[i].qf, book[i].qt);
+    }
+}
+
+char* scan_console()
+{
+    int i = 0;
+    char c;
+    char* str = malloc(1 * sizeof(char));
+    while ((c = getchar()) != ';' && c != '\n' && c != EOF)
+    {
+        *(str + i) = c;
+        i++;
+        str = realloc(str, (i + 1) * sizeof(char));
+    }
+    *(str + i) = '\0';
+    return (str);
+}
+
+void input_file(int i, FILE* fp, struct books* book){
+    fprintf(fp, "\n%s;%s;%s;%s;%s", book[i].num, book[i].author, book[i].title, book[i].qf, book[i].qt);
+}
