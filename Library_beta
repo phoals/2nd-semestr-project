@@ -37,16 +37,9 @@ int main()
         fclose(file);
     }
     if (v == 2){
-        int check = 0;
-        printf("Input book info:\n");
-        book = realloc(book, (digit + 1) * sizeof(struct books));
         getchar();
-        book[digit + 1].num = scan_console(&check);
-        book[digit + 1].author = scan_console(&check);
-        book[digit + 1].title = scan_console(&check);
-        book[digit + 1].qf = scan_console(&check);
-        book[digit + 1].qt = scan_console(&check);
         input_file(digit + 1, file, book);
+        fclose(file);
     }
     return 0;
 }
@@ -120,6 +113,13 @@ char* scan_console()
     return (str);
 }
 
-void input_file(int i, FILE* fp, struct books* book){
-    fprintf(fp, "\n%s;%s;%s;%s;%s", book[i].num, book[i].author, book[i].title, book[i].qf, book[i].qt);
+void input_file(int digit, FILE* fp, struct books* book){
+    printf("Input book info:\n");
+    book = realloc(book, (digit + 1) * sizeof(struct books));
+    book[digit].num = scan_console();
+    book[digit].author = scan_console();
+    book[digit].title = scan_console();
+    book[digit].qf = scan_console();
+    book[digit].qt = scan_console();
+    fprintf(fp, "\n%s;%s;%s;%s;%s", book[digit].num, book[digit].author, book[digit].title, book[digit].qf, book[digit].qt);
 }
