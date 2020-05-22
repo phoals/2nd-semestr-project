@@ -27,6 +27,8 @@ void refresh(FILE*, struct books*, int);
 
 void search(FILE*, struct books*, int);
 
+int page_proofs(char*);
+
 int main()
 {
     int v;
@@ -36,11 +38,11 @@ int main()
     printf("2. Add a book\n");
     printf("3. Delete book\n");
     printf("4. Find a book\n");
-    scanf("%d", &v);
     int digit;
     struct books *book = malloc(1 * sizeof(struct books));
     digit = quantity(file);
     book = input(book, file);
+    scanf("%d", &v);
     if (v == 1) {
         show(book, digit);
         fclose(file);
@@ -56,6 +58,7 @@ int main()
         fclose(file);
         FILE* f = fopen("books.csv", "w");
         refresh(f, book, digit - 1);
+        fclose(file);
     }
     if (v == 4){
         getchar();
@@ -90,7 +93,7 @@ struct books* input(struct books* book, FILE* fp)
         n++;
         book = realloc(book, (n + 1) * sizeof(struct books));
     }
-    return book;
+    return(book);
 }
 
 char* scan(int* checker, FILE* fp)
@@ -108,14 +111,46 @@ char* scan(int* checker, FILE* fp)
     *(str + i) = '\0';
     if (c == EOF)
         *checker = 1;
-    return str;
+    return(str);
 }
 
 void show(struct books* book, int n)
 {
+    int a;
+    int j = 0;
+    printf("+--------------+--------------+--------------+--------------+--------------+\n");
+    printf("|     ISBN     |    Author    |     Title    |     Free     |     Taken    |\n");
+    printf("+--------------+--------------+--------------+--------------+--------------+\n");
     for (int i = 0; i < n; ++i)
     {
-        printf("%s %s %s %s %s\n", book[i].num, book[i].author, book[i].title, book[i].qf, book[i].qt);
+        printf("+--------------+--------------+--------------+--------------+--------------+\n");
+        a = 14 - page_proofs(book[i].num);
+        printf("|%s",book[i].num);
+        for (j = 0; j < a; ++j) {
+            printf(" ");
+        }
+        printf("|%s", book[i].author);
+        a = 14 - page_proofs(book[i].author);
+        for (j = 0; j < a; ++j) {
+            printf(" ");
+        }
+        printf("|%s", book[i].title);
+        a = 14 - page_proofs(book[i].title);
+        for (j = 0; j < a; ++j) {
+            printf(" ");
+        }
+        printf("|%s", book[i].qf);
+        a = 14 - page_proofs(book[i].qf);
+        for (j = 0; j < a; ++j) {
+            printf(" ");
+        }
+        printf("|%s", book[i].qt);
+        a = 14 - page_proofs(book[i].qt);
+        for (j = 0; j < a; ++j) {
+            printf(" ");
+        }
+        printf("|\n");
+        printf("+--------------+--------------+--------------+--------------+--------------+\n");
     }
 }
 
@@ -204,4 +239,14 @@ void search(FILE* fp, struct books* book, int n) {
         printf("Here is your book :\n");
         printf("%s %s %s %s %s\n", book[index].num, book[index].author, book[index].title, book[index].qf, book[index].qt);
     }
+}
+
+int page_proofs(char* str){
+    char c = str[0];
+    int i = 1;
+    while(c != '\0'){
+        i++;
+        c = str[i];
+    }
+    return(i);
 }
