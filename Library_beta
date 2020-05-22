@@ -29,44 +29,58 @@ void search(FILE*, struct books*, int);
 
 int page_proofs(char*);
 
-int main()
-{
+int main() {
     int v;
-    FILE* file = fopen("books.csv", "a+");
+    FILE *file = fopen("books.csv", "a+");
     printf("Choose an option :\n");
     printf("1. Show all books\n");
     printf("2. Add a book\n");
     printf("3. Delete book\n");
     printf("4. Find a book\n");
+    printf("5. Exit\n");
     int digit;
     struct books *book = malloc(1 * sizeof(struct books));
     digit = quantity(file);
     book = input(book, file);
     scanf("%d", &v);
-    if (v == 1) {
-        show(book, digit);
-        fclose(file);
+    while (1) {
+        switch (v) {
+            case 1:
+                v = 0;
+                show(book, digit);
+                fclose(file);
+                scanf("%d", &v);
+                break;
+            case 2:
+                v = 0;
+                getchar();
+                input_file(digit + 1, file, book);
+                fclose(file);
+                scanf("%d", &v);
+                break;
+            case 3:
+                v = 0;
+                getchar();
+                delete(file, book, digit);
+                fclose(file);
+                FILE *f = fopen("books.csv", "w");
+                refresh(f, book, digit - 1);
+                fclose(file);
+                scanf("%d", &v);
+                break;
+            case 4:
+                v = 0;
+                getchar();
+                search(file, book, digit);
+                fclose(file);
+                scanf("%d", &v);
+                break;
+            case 5:
+                return (0);
+        }
     }
-    if (v == 2){
-        getchar();
-        input_file(digit + 1, file, book);
-        fclose(file);
-    }
-    if (v == 3){
-        getchar();
-        delete(file, book, digit);
-        fclose(file);
-        FILE* f = fopen("books.csv", "w");
-        refresh(f, book, digit - 1);
-        fclose(file);
-    }
-    if (v == 4){
-        getchar();
-        search(file, book, digit);
-        fclose(file);
-    }
-    return 0;
 }
+
 
 int quantity(FILE* fp){
     int n = 1;
@@ -178,6 +192,7 @@ void input_file(int digit, FILE* fp, struct books* book){
     book[digit].qf = scan_console();
     book[digit].qt = scan_console();
     fprintf(fp, "\n%s;%s;%s;%s;%s", book[digit].num, book[digit].author, book[digit].title, book[digit].qf, book[digit].qt);
+    printf("Book successfully added");
 }
 
 void delete(FILE* fp, struct books* book, int n){
@@ -216,6 +231,7 @@ void refresh(FILE* fp, struct books* book, int n){
         fprintf(fp, "%s;%s;%s;%s;%s\n", book[i].num, book[i].author, book[i].title, book[i].qf, book[i].qt);
     }
     fprintf(fp, "%s;%s;%s;%s;%s", book[n - 1].num, book[n - 1].author, book[n - 1].title, book[n - 1].qf, book[n - 1].qt);
+    printf("Book successfully deleted");
 }
 
 void search(FILE* fp, struct books* book, int n) {
