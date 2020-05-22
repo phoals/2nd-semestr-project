@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 struct books{
     char* num;
@@ -20,6 +21,10 @@ char* scan_console();
 
 void input_file(int, FILE*, struct books*);
 
+void delete(FILE*, struct books*, int);
+
+void refresh(FILE*, struct books*, int);
+
 int main()
 {
     int v;
@@ -27,6 +32,7 @@ int main()
     printf("Choose an option :\n");
     printf("1. Show all books\n");
     printf("2. Add a book\n");
+    printf("3. Delete book\n");
     scanf("%d", &v);
     int digit;
     struct books *book = malloc(1 * sizeof(struct books));
@@ -40,6 +46,13 @@ int main()
         getchar();
         input_file(digit + 1, file, book);
         fclose(file);
+    }
+    if (v == 3){
+        getchar();
+        delete(file, book, digit);
+        fclose(file);
+        FILE* f = fopen("books.csv", "w");
+        refresh(f, book, digit - 1);
     }
     return 0;
 }
@@ -122,4 +135,42 @@ void input_file(int digit, FILE* fp, struct books* book){
     book[digit].qf = scan_console();
     book[digit].qt = scan_console();
     fprintf(fp, "\n%s;%s;%s;%s;%s", book[digit].num, book[digit].author, book[digit].title, book[digit].qf, book[digit].qt);
+}
+
+void delete(FILE* fp, struct books* book, int n){
+    printf("\nEnter an ISBN code of a book you want to delete:\n");
+    int i = 0;
+    int index = 0;
+    char c;
+    char* str = malloc(1 * sizeof(char));
+    while ((c = getchar()) != '\n')
+    {
+        *(str + i) = c;
+        i++;
+        str = realloc(str, (i + 1) * sizeof(char));
+    }
+    *(str + i) = '\0';
+    for (i = 0; i < n; i++) {
+        if (strcmp (book[i].num, str) == 0) index = i;
+    }
+    for (i = index; i < n - 1; ++i) {
+        book[i].num = book[i + 1].num;
+        book[i].author = book[i + 1].author;
+        book[i].title = book[i + 1].title;
+        book[i].qf = book[i + 1].qf;
+        book[i].qt = book[i + 1].qt;
+    }
+    book[n].num = NULL;
+    book[n].author = NULL;
+    book[n].title = NULL;
+    book[n].qf = NULL;
+    book[n].qt = NULL;
+}
+
+void refresh(FILE* fp, struct books* book, int n){
+    book = realloc(book, (n) * sizeof(struct books));
+    for (int i = 0; i < n - 1; ++i) {
+        fprintf(fp, "%s;%s;%s;%s;%s\n", book[i].num, book[i].author, book[i].title, book[i].qf, book[i].qt);
+    }
+    fprintf(fp, "%s;%s;%s;%s;%s", book[n - 1].num, book[n - 1].author, book[n - 1].title, book[n - 1].qf, book[n - 1].qt);
 }
