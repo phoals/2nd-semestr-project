@@ -29,6 +29,16 @@ void search(FILE*, struct books*, int);
 
 int page_proofs(char*);
 
+int char_to_int(char*);
+
+void shell(int , int*);
+
+char* int_to_char(int);
+
+void swap(char* ,char*);
+
+void sort(FILE *, struct books*, int);
+
 int main() {
     int v;
     FILE *file = fopen("books.csv", "a+");
@@ -47,6 +57,7 @@ int main() {
         switch (v) {
             case 1:
                 v = 0;
+                sort(file, book, digit);
                 show(book, digit);
                 fclose(file);
                 scanf("%d", &v);
@@ -112,18 +123,17 @@ struct books* input(struct books* book, FILE* fp)
 
 char* scan(int* checker, FILE* fp)
 {
-    int n = 1;
-    int i = 0;
-    char c;
-    char* str = malloc(1 * sizeof(char));
-    while ((c = getc(fp)) != ';' && c != '\n' && c != EOF)
+    int i = 0;// index massiva
+    char c;// schitivaemiy simvol
+    char* str = malloc(1 * sizeof(char));// simvoli schitautsa v etu stroku, sozdaem pervuy yacheiku pamyati dlya pervogo simvola
+    while ((c = getc(fp)) != ';' && c != '\n' && c != EOF)// schitivaem simvoli poka ne ; ili ne perehod na novuy stroku ili ne konec faila
     {
-        *(str + i) = c;
-        i += 1;
-        str = realloc(str, (i + 1) * sizeof(char));
+        *(str + i) = c;//str[i] = c
+        i++;//increment indexa
+        str = realloc(str, (i + 1) * sizeof(char));// dobavlyaem yaechiku pamyati dly next simvola
     }
-    *(str + i) = '\0';
-    if (c == EOF)
+    *(str + i) = '\0';//posle zaversheniya cikla stavim v konec stroki simvol konca, chtobi ne bilo bagov pri vivode
+    if (c == EOF)//esli schitalsya konec fayla i vishlo iz cikla, peredaem infu ob etom v input, znak togo chto cikl v inpute nado zavershit
         *checker = 1;
     return(str);
 }
@@ -265,4 +275,85 @@ int page_proofs(char* str){
         c = str[i];
     }
     return(i);
+}
+
+int char_to_int(char* str){
+    int digit = 0;
+    int i = 0;
+    while (str[i] != '\0') {
+        digit = digit * 10;
+        digit = digit + (str[i] - '0');
+        i++;
+    }
+    return digit;
+}
+
+void shell(int n, int* mass)
+{
+    int i, j, step;
+    int tmp;
+    for (step = n / 2; step > 0; step /= 2)
+        for (i = step; i < n; i++)
+        {
+            tmp = mass[i];
+            for (j = i; j >= step; j -= step)
+            {
+                if (tmp < mass[j - step])
+                    mass[j] = mass[j - step];
+                else
+                    break;
+            }
+            mass[j] = tmp;
+        }
+}
+
+char* int_to_char(int digit){
+    int n = 0;
+    int* d = malloc(1 * sizeof(int));
+    char* str = malloc(1 * sizeof(char));
+    while (digit> 0) {
+        n++;
+        d[n - 1] = digit % 10;
+        d = realloc(d, (n + 1) * sizeof(int));
+        digit = digit / 10;
+    }
+    str = realloc(str, n * sizeof(char));
+    for (int i = 0; i < n; ++i) {
+        str[i] = d[n - i - 1] + '0';
+    }
+    str[n] = '\0';
+    return(str);
+}
+
+void sort(FILE *fp, struct books* book, int n){
+    char* s;
+    int i = 0;
+    int k = 0;
+    int* num = malloc(n * sizeof(int));
+    for (i = 0; i < n; ++i) {
+        num[i] = char_to_int(book[i].num);
+    }
+    shell(n, num);
+    for (i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (strcmp(int_to_char(num[i]), book[j].num) == 0) {
+               s = book[k].num;
+               book[k].num = book[j].num;
+               book[j].num = s;
+               s = book[k].author;
+               book[k].author = book[j].author;
+               book[j].author = s;
+               s = book[k].title;
+               book[k].title = book[j].title;
+               book[j].title = s;
+               s = book[k].qf;
+               book[k].qf = book[j].qf;
+               book[j].qf = s;
+               s = book[k].qt;
+               book[k].qt = book[j].qt;
+               book[j].qt = s;
+            }
+        }
+        k++;
+    }
 }
