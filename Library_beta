@@ -87,6 +87,7 @@ int main() {
                 scanf("%d", &v);
                 break;
             case 5:
+                free(book);
                 return (0);
         }
     }
@@ -123,17 +124,17 @@ struct books* input(struct books* book, FILE* fp)
 
 char* scan(int* checker, FILE* fp)
 {
-    int i = 0;// index massiva
-    char c;// schitivaemiy simvol
-    char* str = malloc(1 * sizeof(char));// simvoli schitautsa v etu stroku, sozdaem pervuy yacheiku pamyati dlya pervogo simvola
-    while ((c = getc(fp)) != ';' && c != '\n' && c != EOF)// schitivaem simvoli poka ne ; ili ne perehod na novuy stroku ili ne konec faila
+    int i = 0;
+    char c;
+    char* str = malloc(1 * sizeof(char));
+    while ((c = getc(fp)) != ';' && c != '\n' && c != EOF)
     {
-        *(str + i) = c;//str[i] = c
-        i++;//increment indexa
-        str = realloc(str, (i + 1) * sizeof(char));// dobavlyaem yaechiku pamyati dly next simvola
+        *(str + i) = c;
+        i++;
+        str = realloc(str, (i + 1) * sizeof(char));
     }
-    *(str + i) = '\0';//posle zaversheniya cikla stavim v konec stroki simvol konca, chtobi ne bilo bagov pri vivode
-    if (c == EOF)//esli schitalsya konec fayla i vishlo iz cikla, peredaem infu ob etom v input, znak togo chto cikl v inpute nado zavershit
+    *(str + i) = '\0';
+    if (c == EOF)
         *checker = 1;
     return(str);
 }
@@ -142,24 +143,24 @@ void show(struct books* book, int n)
 {
     int a;
     int j = 0;
-    printf("+--------------+--------------+--------------+--------------+--------------+\n");
-    printf("|     ISBN     |    Author    |     Title    |     Free     |     Taken    |\n");
-    printf("+--------------+--------------+--------------+--------------+--------------+\n");
+    printf("+--------------+-------------------+-----------------+--------------+--------------+\n");
+    printf("|     ISBN     |       Author      |      Title      |     Free     |     Taken    |\n");
+    printf("+--------------+-------------------+-----------------+--------------+--------------+\n");
     for (int i = 0; i < n; ++i)
     {
-        printf("+--------------+--------------+--------------+--------------+--------------+\n");
+        printf("+--------------+-------------------+-----------------+--------------+--------------+\n");
         a = 14 - page_proofs(book[i].num);
         printf("|%s",book[i].num);
         for (j = 0; j < a; ++j) {
             printf(" ");
         }
         printf("|%s", book[i].author);
-        a = 14 - page_proofs(book[i].author);
+        a = 19 - page_proofs(book[i].author);
         for (j = 0; j < a; ++j) {
             printf(" ");
         }
         printf("|%s", book[i].title);
-        a = 14 - page_proofs(book[i].title);
+        a = 17 - page_proofs(book[i].title);
         for (j = 0; j < a; ++j) {
             printf(" ");
         }
@@ -174,7 +175,7 @@ void show(struct books* book, int n)
             printf(" ");
         }
         printf("|\n");
-        printf("+--------------+--------------+--------------+--------------+--------------+\n");
+        printf("+--------------+-------------------+-----------------+--------------+--------------+\n");
     }
 }
 
@@ -202,7 +203,7 @@ void input_file(int digit, FILE* fp, struct books* book){
     book[digit].qf = scan_console();
     book[digit].qt = scan_console();
     fprintf(fp, "\n%s;%s;%s;%s;%s", book[digit].num, book[digit].author, book[digit].title, book[digit].qf, book[digit].qt);
-    printf("Book successfully added");
+    printf("Book successfully added\n");
 }
 
 void delete(FILE* fp, struct books* book, int n){
@@ -241,7 +242,7 @@ void refresh(FILE* fp, struct books* book, int n){
         fprintf(fp, "%s;%s;%s;%s;%s\n", book[i].num, book[i].author, book[i].title, book[i].qf, book[i].qt);
     }
     fprintf(fp, "%s;%s;%s;%s;%s", book[n - 1].num, book[n - 1].author, book[n - 1].title, book[n - 1].qf, book[n - 1].qt);
-    printf("Book successfully deleted");
+    printf("Book successfully deleted\n");
 }
 
 void search(FILE* fp, struct books* book, int n) {
@@ -260,7 +261,7 @@ void search(FILE* fp, struct books* book, int n) {
     for (i = 0; i < n; i++) {
         if (strcmp (book[i].num, str) == 0) index = i;
     }
-    if (index == -1) printf("There is no book with this parameters");
+    if (index == -1) printf("There is no book with this parameters\n");
     else {
         printf("Here is your book :\n");
         printf("%s %s %s %s %s\n", book[index].num, book[index].author, book[index].title, book[index].qf, book[index].qt);
