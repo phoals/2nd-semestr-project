@@ -9,6 +9,7 @@ struct books{
     char* qf;
     char* qt;
 };
+
 int quantity(FILE*);
 
 char* scan(int*, FILE*);
@@ -18,6 +19,8 @@ struct books* input(struct books*, FILE*);
 void show(struct books*, int);
 
 char* scan_console();
+
+int check(struct books*, int, char*);
 
 void input_file(int, FILE*, struct books*);
 
@@ -35,13 +38,11 @@ void shell(int , int*);
 
 char* int_to_char(int);
 
-void swap(char* ,char*);
-
 void sort(FILE *, struct books*, int);
 
 int main() {
-    int v;
     FILE *file = fopen("books.csv", "a+");
+    int v;
     printf("Choose an option :\n");
     printf("1. Show all books\n");
     printf("2. Add a book\n");
@@ -59,21 +60,18 @@ int main() {
                 v = 0;
                 sort(file, book, digit);
                 show(book, digit);
-                fclose(file);
                 scanf("%d", &v);
                 break;
             case 2:
                 v = 0;
                 getchar();
                 input_file(digit + 1, file, book);
-                fclose(file);
                 scanf("%d", &v);
                 break;
             case 3:
                 v = 0;
                 getchar();
                 delete(file, book, digit);
-                fclose(file);
                 FILE *f = fopen("books.csv", "w");
                 refresh(f, book, digit - 1);
                 fclose(file);
@@ -83,11 +81,18 @@ int main() {
                 v = 0;
                 getchar();
                 search(file, book, digit);
-                fclose(file);
                 scanf("%d", &v);
                 break;
             case 5:
+                for (int i = 0; i < digit; ++i) {
+                    free(book[i].num);
+                    free(book[i].author);
+                    free(book[i].title);
+                    free(book[i].qf);
+                    free(book[i].qt );
+                }
                 free(book);
+                fclose(file);
                 return (0);
         }
     }
@@ -194,16 +199,29 @@ char* scan_console()
     return (str);
 }
 
+int check(struct books* book, int n, char* str){
+    int checker = 0;
+    for (int i = 0; i < n; ++i) {
+        if (strcmp(book[i].num, str) == 0) checker = 1;
+    }
+    return checker;
+}
+
 void input_file(int digit, FILE* fp, struct books* book){
     printf("Input book info:\n");
     book = realloc(book, (digit + 1) * sizeof(struct books));
     book[digit].num = scan_console();
-    book[digit].author = scan_console();
-    book[digit].title = scan_console();
-    book[digit].qf = scan_console();
-    book[digit].qt = scan_console();
-    fprintf(fp, "\n%s;%s;%s;%s;%s", book[digit].num, book[digit].author, book[digit].title, book[digit].qf, book[digit].qt);
-    printf("Book successfully added\n");
+    if (check(book, digit - 1, book[digit].num) == 0) {
+        book[digit].author = scan_console();
+        book[digit].title = scan_console();
+        book[digit].qf = scan_console();
+        book[digit].qt = scan_console();
+        fprintf(fp, "\n%s;%s;%s;%s;%s", book[digit].num, book[digit].author, book[digit].title, book[digit].qf,
+                book[digit].qt);
+        printf("Book successfully added\n");
+    } else {
+        printf("Book with this ISBN already exist\n");
+    }
 }
 
 void delete(FILE* fp, struct books* book, int n){
