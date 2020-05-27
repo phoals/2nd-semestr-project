@@ -10,6 +10,13 @@ struct books{
     char* qt;
 };
 
+struct users{
+    char* login;
+    char* pass;
+    char* stud;
+    char* lib;
+};
+
 int quantity(FILE*);
 
 char* scan(int*, FILE*);
@@ -39,62 +46,94 @@ void shell(int , int*);
 char* int_to_char(int);
 
 void sort(FILE *, struct books*, int);
+/***************************************************************/
+struct users* input_users(struct users*, FILE*);
+
+int check_users_lg(struct users*, int, char*);
+
+int check_users_ps(struct users*, int, char*);
+
+int index(struct users* , int, char*);
+
+int mode(char*, char*, struct users*, int);
 
 int main() {
+    FILE *fusers = fopen("users.csv", "r");
+    int digit_users = quantity(fusers);
+    struct users* user = malloc(1 * sizeof(struct users));
+    user = input_users(user, fusers);
     FILE *file = fopen("books.csv", "a+");
-    int v;
-    printf("Choose an option :\n");
-    printf("1. Show all books\n");
-    printf("2. Add a book\n");
-    printf("3. Delete book\n");
-    printf("4. Find a book\n");
-    printf("5. Exit\n");
-    int digit;
-    struct books *book = malloc(1 * sizeof(struct books));
-    digit = quantity(file);
-    book = input(book, file);
-    scanf("%d", &v);
-    while (1) {
-        switch (v) {
-            case 1:
-                v = 0;
-                sort(file, book, digit);
-                show(book, digit);
-                scanf("%d", &v);
-                break;
-            case 2:
-                v = 0;
-                getchar();
-                input_file(digit + 1, file, book);
-                scanf("%d", &v);
-                break;
-            case 3:
-                v = 0;
-                getchar();
-                delete(file, book, digit);
-                FILE *f = fopen("books.csv", "w");
-                refresh(f, book, digit - 1);
-                fclose(file);
-                scanf("%d", &v);
-                break;
-            case 4:
-                v = 0;
-                getchar();
-                search(file, book, digit);
-                scanf("%d", &v);
-                break;
-            case 5:
-                for (int i = 0; i < digit; ++i) {
-                    free(book[i].num);
-                    free(book[i].author);
-                    free(book[i].title);
-                    free(book[i].qf);
-                    free(book[i].qt );
+    printf("Login:");
+    char* log = scan_console();
+    printf("Password:");
+    char *psw = scan_console();
+    int var = mode(log, psw, user, digit_users);
+    switch (var) {
+        case 0:
+            printf("Invalid login or password");
+        break;
+        case 1:
+            printf("\nU entered as an admin\n");
+        break;
+        case 2:
+            printf("\nU entered as a student moderator\n");
+        break;
+        case 3:
+            printf("\nU entered as a library moderator\n\n");
+            int v;
+            printf("Choose an option :\n");
+            printf("1. Show all books\n");
+            printf("2. Add a book\n");
+            printf("3. Delete book\n");
+            printf("4. Find a book\n");
+            printf("5. Exit\n");
+            int digit;
+            struct books *book = malloc(1 * sizeof(struct books));
+            digit = quantity(file);
+            book = input(book, file);
+            scanf("%d", &v);
+            while (1) {
+                switch (v) {
+                    case 1:
+                        v = 0;
+                        sort(file, book, digit);
+                        show(book, digit);
+                        scanf("%d", &v);
+                        break;
+                    case 2:
+                        v = 0;
+                        getchar();
+                        input_file(digit + 1, file, book);
+                        scanf("%d", &v);
+                        break;
+                    case 3:
+                        v = 0;
+                        getchar();
+                        delete(file, book, digit);
+                        FILE *f = fopen("books.csv", "w");
+                        refresh(f, book, digit - 1);
+                        fclose(file);
+                        scanf("%d", &v);
+                        break;
+                    case 4:
+                        v = 0;
+                        getchar();
+                        search(file, book, digit);
+                        scanf("%d", &v);
+                        break;
+                    case 5:
+                        for (int i = 0; i < digit; ++i) {
+                            free(book[i].num);
+                            free(book[i].author);
+                            free(book[i].title);
+                            free(book[i].qf);
+                            free(book[i].qt );
+                        }
+                        free(book);
+                        fclose(file);
+                        return (0);
                 }
-                free(book);
-                fclose(file);
-                return (0);
-        }
+            }
     }
 }
 
@@ -375,4 +414,57 @@ void sort(FILE *fp, struct books* book, int n){
         }
         k++;
     }
+}
+/***********************************************************************************/
+struct users* input_users(struct users* user, FILE* fp)
+{
+    int n = 0;
+    int checker = 0;
+    while (checker != 1)
+    {
+        user[n].login = scan(&checker, fp);
+        user[n].pass = scan(&checker, fp);
+        user[n].stud = scan(&checker, fp);
+        user[n].lib = scan(&checker, fp);
+        n++;
+        user = realloc(user, (n + 1) * sizeof(struct books));
+    }
+    return(user);
+}
+
+int check_users_lg(struct users* user, int n, char* str){
+    int checker = 0;
+    for (int i = 0; i < n; ++i) {
+        if (strcmp(user[i].login, str) == 0) checker = 1;
+    }
+    return checker;
+}
+
+int check_users_ps(struct users* user, int n, char* str){
+    int checker = 0;
+    for (int i = 0; i < n; ++i) {
+        if (strcmp(user[i].pass, str) == 0) checker = 1;
+    }
+    return checker;
+}
+
+int index(struct users* user, int n, char* str){
+    int ind = -1;
+    for (int i = 0; i < n; ++i) {
+        if (strcmp(user[i].login, str) == 0) ind = i;
+    }
+    return ind;
+}
+
+int mode(char* login, char* password, struct users* user, int n) {
+    int m;
+    if (check_users_lg(user, n, login) == 1 && check_users_ps(user, n, password) == 1) {
+        int i = index(user, n, login);
+        int stud = char_to_int(user[i].stud);
+        int lib = char_to_int(user[i].lib);
+        if (stud == 1 && lib == 1) m = 1;
+        if (stud == 1 && lib == 0) m = 2;
+        if (stud == 0 && lib == 1) m = 3;
+    } else m = 0;
+    return m;
 }
