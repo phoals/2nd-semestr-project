@@ -60,9 +60,7 @@ int lib_moderator(FILE*);
 
 /*****************Students**********************/
 
-int stud_moderator(FILE*);
-
-struct students* input_students(struct students*, FILE*);
+struct students* input_students(struct students*, FILE*, int);
 
 void stud_sort(FILE *, struct students* , int );
 
@@ -77,6 +75,8 @@ void delete_s(FILE* , struct students* , int );
 void refresh_s(FILE* fp, struct students* stud, int n);
 
 void edit_s();
+
+int stud_moderator(FILE*);
 /*****************Users*************************/
 struct users* input_users(struct users*, FILE*);
 
@@ -90,11 +90,11 @@ int mode(char*, char*, struct users*, int);
 
 int main() {
     FILE *fusers = fopen("users.csv", "r");
+    FILE *file = fopen("books.csv", "a+");
+    FILE *studfile = fopen("students.csv", "a+");
     int digit_users = quantity(fusers);
     struct users* user = malloc(1 * sizeof(struct users));
     user = input_users(user, fusers);
-    FILE *file = fopen("books.csv", "a+");
-    FILE *studfile = fopen("students.csv", "a+");
     printf("Login:");
     char* log = scan_console();
     printf("Password:");
@@ -109,7 +109,6 @@ int main() {
         break;
         case 2:
             return(stud_moderator(studfile));
-        break;
         case 3:
             return(lib_moderator(file));
     }
@@ -507,78 +506,19 @@ int mode(char* login, char* password, struct users* user, int n) {
 
 /***********************Students*********************************/
 
-int stud_moderator(FILE*file) {
-    printf("\nU entered as a student moderator\n\n");
-    int v;
-    printf("Choose an option :\n");
-    printf("1. Show all students\n");
-    printf("2. Add a student\n");
-    printf("3. Delete student\n");
-    printf("4. Edit student\n");
-    printf("5. Exit\n");
-    int digit;
-    struct students *stud = malloc(1 * sizeof(struct books));
-    digit = quantity(file);
-    stud = input_students(stud, file);
-    scanf("%d", &v);
-    while (1) {
-        switch (v) {
-            case 1:
-                v = 0;
-                stud_sort(file, stud, digit);
-                show_s(stud, digit);
-                scanf("%d", &v);
-                break;
-            case 2:
-                v = 0;
-                getchar();
-                input_file_s(digit + 1, file, stud);
-                scanf("%d", &v);
-                break;
-            case 3:
-                v = 0;
-                getchar();
-                delete_s(file, stud, digit);
-                FILE *f = fopen("students.csv", "w");
-                refresh_s(f, stud, digit - 1);
-                fclose(file);
-                scanf("%d", &v);
-                break;
-            case 4:
-                v = 0;
-                getchar();
-                edit_s(file, stud, digit);
-                scanf("%d", &v);
-                break;
-            case 5:
-                for (int i = 0; i < digit; ++i) {
-                    free(stud[i].id);
-                    free(stud[i].name);
-                    free(stud[i].surname);
-                    free(stud[i].fname);
-                    free(stud[i].faculty );
-                    free(stud[i].spec );
-                }
-                free(stud);
-                fclose(file);
-                return 0;
-        }
-    }
-}
-
-struct students* input_students(struct students* stud, FILE* fp) {
-    int n = 0;
+struct students* input_students(struct students* stud, FILE* fp, int n) {
+    stud = malloc(n * sizeof(struct books));
+    int i = 0;
     int checker = 0;
     while (checker != 1)
     {
-        stud[n].id = scan(&checker, fp);
-        stud[n].name = scan(&checker, fp);
-        stud[n].surname = scan(&checker, fp);
-        stud[n].fname = scan(&checker, fp);
-        stud[n].faculty = scan(&checker, fp);
-        stud[n].spec = scan(&checker, fp);
-        n++;
-        stud = realloc(stud, (n + 1) * sizeof(struct books));
+        stud[i].id = scan(&checker, fp);
+        stud[i].name = scan(&checker, fp);
+        stud[i].surname = scan(&checker, fp);
+        stud[i].fname = scan(&checker, fp);
+        stud[i].faculty = scan(&checker, fp);
+        stud[i].spec = scan(&checker, fp);
+        i++;
     }
     return(stud);
 }
@@ -586,50 +526,50 @@ struct students* input_students(struct students* stud, FILE* fp) {
 void show_s(struct students* stud, int n)
 {
     int a;
-    int j = 0;
-    printf("+--------------+-------------------+-----------------+-------------------+--------------+--------------------------------------------------+\n");
-    printf("|      ID      |        Name       |     Surname     |    Fathers name   |    Faculty   |                    Specialty                     |\n");
-    printf("+--------------+-------------------+-----------------+-------------------+--------------+--------------------------------------------------+\n");
+    int j;
+    printf("+----------+--------------+--------------+--------------+---------+------------------------+\n");
+    printf("|    ID    |     Name     |    Surname   | Fathers name | Faculty |        Specialty       |\n");
+    printf("+----------+--------------+--------------+--------------+---------+------------------------+\n");
     for (int i = 0; i < n; ++i)
     {
-        printf("+--------------+-------------------+-----------------+-------------------+--------------+--------------------------------------------------+\n");
-        a = 14 - page_proofs(stud[i].id);
+        printf("+----------+--------------+--------------+--------------+---------+------------------------+\n");
+        a = 10 - page_proofs(stud[i].id);
         printf("|%s",stud[i].id);
         for (j = 0; j < a; ++j) {
             printf(" ");
         }
         printf("|%s", stud[i].name);
-        a = 19 - page_proofs(stud[i].name);
+        a = 14 - page_proofs(stud[i].name);
         for (j = 0; j < a; ++j) {
             printf(" ");
         }
         printf("|%s", stud[i].surname);
-        a = 17 - page_proofs(stud[i].surname);
+        a = 14 - page_proofs(stud[i].surname);
         for (j = 0; j < a; ++j) {
             printf(" ");
         }
         printf("|%s", stud[i].fname);
-        a = 19 - page_proofs(stud[i].fname);
+        a = 14 - page_proofs(stud[i].fname);
         for (j = 0; j < a; ++j) {
             printf(" ");
         }
         printf("|%s", stud[i].faculty);
-        a = 14 - page_proofs(stud[i].faculty);
+        a = 9 - page_proofs(stud[i].faculty);
         for (j = 0; j < a; ++j) {
             printf(" ");
         }
         printf("|%s", stud[i].spec);
-        a = 50 - page_proofs(stud[i].spec);
+        a = 24 - page_proofs(stud[i].spec);
         for (j = 0; j < a; ++j) {
             printf(" ");
         }
         printf("|\n");
-        printf("+--------------+-------------------+-----------------+-------------------+--------------+--------------------------------------------------+\n");
+        printf("+----------+--------------+--------------+--------------+---------+------------------------+\n");
     }
 }
 
 void stud_sort(FILE *fp, struct students* stud, int n){
-    char* s;
+    /**char* s;
     int i = 0;
     int k = 0;
     int* num = malloc(n * sizeof(int));
@@ -661,19 +601,19 @@ void stud_sort(FILE *fp, struct students* stud, int n){
             }
         }
         k++;
-    }
+    }**/
 }
 
 int check_s(struct students* stud, int n, char* str){
-    int checker = 0;
+    /**int checker = 0;
     for (int i = 0; i < n; ++i) {
         if (strcmp(stud[i].id, str) == 0) checker = 1;
     }
-    return checker;
+    return checker;**/
 }
 
 void input_file_s(int digit, FILE* fp, struct students* stud){
-    printf("Input student info:\n");
+    /**printf("Input student info:\n");
     stud = realloc(stud, (digit + 1) * sizeof(struct students));
     stud[digit].id = scan_console();
     if (check_s(stud, digit - 1, stud[digit].id) == 0) {
@@ -687,11 +627,11 @@ void input_file_s(int digit, FILE* fp, struct students* stud){
         printf("Student successfully added\n");
     } else {
         printf("Student with this ID already exist\n");
-    }
+    }**/
 }
 
 void delete_s(FILE* fp, struct students* stud, int n){
-    printf("\nEnter student's ID you want to delete:\n");
+    /**printf("\nEnter student's ID you want to delete:\n");
     int i = 0;
     int index;
     char c;
@@ -719,18 +659,77 @@ void delete_s(FILE* fp, struct students* stud, int n){
     stud[n].surname = NULL;
     stud[n].fname = NULL;
     stud[n].faculty = NULL;
-    stud[n].spec = NULL;
+    stud[n].spec = NULL;**/
 }
 
 void refresh_s(FILE* fp, struct students* stud, int n){
-    stud = realloc(stud, (n) * sizeof(struct books));
+    /**stud = realloc(stud, (n) * sizeof(struct books));
     for (int i = 0; i < n - 1; ++i) {
         fprintf(fp, "%s;%s;%s;%s;%s;%s\n", stud[i].id, stud[i].name, stud[i].surname, stud[i].fname, stud[i].faculty, stud[i].spec);
     }
     fprintf(fp, "%s;%s;%s;%s;%s;%s", stud[n - 1].id, stud[n - 1].name, stud[n - 1].surname, stud[n - 1].fname, stud[n - 1].faculty, stud[n - 1].spec);
-    printf("Students successfully deleted\n");
+    printf("Students successfully deleted\n");**/
 }
 
 void edit_s() {
     /****/
+}
+
+int stud_moderator(FILE*file) {
+    printf("\nU entered as a student moderator\n\n");
+    int v;
+    printf("Choose an option :\n");
+    printf("1. Show all students\n");
+    printf("2. Add a student\n");
+    printf("3. Delete student\n");
+    printf("4. Edit student\n");
+    printf("5. Exit\n");
+    int digit;
+    struct students *stud = malloc(1 * sizeof(struct students));
+    digit = quantity(file);
+    stud = input_students(stud, file, digit);
+    scanf("%d", &v);
+    while (1) {
+        switch (v) {
+            case 1:
+                v = 0;
+                /**stud_sort(file, stud, digit);**/
+                show_s(stud, digit);
+                scanf("%d", &v);
+                break;
+            case 2:
+                v = 0;
+                getchar();
+                input_file_s(digit + 1, file, stud);
+                scanf("%d", &v);
+                break;
+            case 3:
+                v = 0;
+                getchar();
+                delete_s(file, stud, digit);
+                FILE *f = fopen("students.csv", "w");
+                refresh_s(f, stud, digit - 1);
+                fclose(file);
+                scanf("%d", &v);
+                break;
+            case 4:
+                v = 0;
+                getchar();
+                edit_s(file, stud, digit);
+                scanf("%d", &v);
+                break;
+            case 5:
+                for (int i = 0; i < digit; ++i) {
+                    free(stud[i].id);
+                    free(stud[i].name);
+                    free(stud[i].surname);
+                    free(stud[i].fname);
+                    free(stud[i].faculty );
+                    free(stud[i].spec);
+                }
+                free(stud);
+                fclose(file);
+                return 0;
+        }
+    }
 }
