@@ -60,9 +60,7 @@ int lib_moderator(FILE*);
 
 /*****************Students**********************/
 
-struct students* input_students(struct students*, FILE*, int);
-
-void stud_sort(FILE *, struct students* , int );
+struct students* input_students(struct students*, FILE*);
 
 void show_s(struct students*, int);
 
@@ -70,11 +68,13 @@ int check_s(struct students*, int, char*);
 
 void input_file_s(int, FILE*, struct students*);
 
-void delete_s(FILE* , struct students* , int );
+void delete_s(struct students* , int );
 
 void refresh_s(FILE* fp, struct students* stud, int n);
 
-void edit_s();
+void update_s(FILE*, struct students*, int);
+
+void edit_s(struct students*, int, FILE*);
 
 int stud_moderator(FILE*);
 /*****************Users*************************/
@@ -89,6 +89,7 @@ int index(struct users* , int, char*);
 int mode(char*, char*, struct users*, int);
 
 int main() {
+    int close;
     FILE *fusers = fopen("users.csv", "r");
     FILE *file = fopen("books.csv", "a+");
     FILE *studfile = fopen("students.csv", "a+");
@@ -108,7 +109,7 @@ int main() {
             printf("\nU entered as an admin\n");
         break;
         case 2:
-            return(stud_moderator(studfile));
+            return (stud_moderator(studfile));
         case 3:
             return(lib_moderator(file));
     }
@@ -506,8 +507,7 @@ int mode(char* login, char* password, struct users* user, int n) {
 
 /***********************Students*********************************/
 
-struct students* input_students(struct students* stud, FILE* fp, int n) {
-    stud = malloc(n * sizeof(struct books));
+struct students* input_students(struct students* stud, FILE* fp) {
     int i = 0;
     int checker = 0;
     while (checker != 1)
@@ -519,6 +519,7 @@ struct students* input_students(struct students* stud, FILE* fp, int n) {
         stud[i].faculty = scan(&checker, fp);
         stud[i].spec = scan(&checker, fp);
         i++;
+        stud = realloc(stud, (i + 1) * sizeof(struct students));
     }
     return(stud);
 }
@@ -568,52 +569,16 @@ void show_s(struct students* stud, int n)
     }
 }
 
-void stud_sort(FILE *fp, struct students* stud, int n){
-    /**char* s;
-    int i = 0;
-    int k = 0;
-    int* num = malloc(n * sizeof(int));
-    for (i = 0; i < n; ++i) {
-        num[i] = char_to_int(stud[i].id);
-    }
-    shell(n, num);
-    for (i = 0; i < n; ++i) {
-        for (int j = 0; j < n; ++j) {
-            if (strcmp(int_to_char(num[i]), stud[j].id) == 0) {
-                s = stud[k].id;
-                stud[k].id = stud[j].id;
-                stud[j].id = s;
-                s = stud[k].name;
-                stud[k].name = stud[j].name;
-                stud[j].name = s;
-                s = stud[k].surname;
-                stud[k].surname = stud[j].surname;
-                stud[j].surname = s;
-                s = stud[k].fname;
-                stud[k].fname = stud[j].fname;
-                stud[j].fname = s;
-                s = stud[k].faculty;
-                stud[k].faculty = stud[j].faculty;
-                stud[j].faculty = s;
-                s = stud[k].spec;
-                stud[k].spec = stud[j].spec;
-                stud[j].spec = s;
-            }
-        }
-        k++;
-    }**/
-}
-
 int check_s(struct students* stud, int n, char* str){
-    /**int checker = 0;
+    int checker = 0;
     for (int i = 0; i < n; ++i) {
         if (strcmp(stud[i].id, str) == 0) checker = 1;
     }
-    return checker;**/
+    return checker;
 }
 
 void input_file_s(int digit, FILE* fp, struct students* stud){
-    /**printf("Input student info:\n");
+    printf("Input student info:\n");
     stud = realloc(stud, (digit + 1) * sizeof(struct students));
     stud[digit].id = scan_console();
     if (check_s(stud, digit - 1, stud[digit].id) == 0) {
@@ -626,23 +591,15 @@ void input_file_s(int digit, FILE* fp, struct students* stud){
                 stud[digit].faculty, stud[digit].spec);
         printf("Student successfully added\n");
     } else {
-        printf("Student with this ID already exist\n");
-    }**/
+        printf("Student with this ID already exists\n");
+    }
 }
 
-void delete_s(FILE* fp, struct students* stud, int n){
-    /**printf("\nEnter student's ID you want to delete:\n");
-    int i = 0;
+void delete_s(struct students* stud, int n){
+    printf("\nEnter student's ID you want to delete:\n");
+    int i;
     int index;
-    char c;
-    char* str = malloc(1 * sizeof(char));
-    while ((c = getchar()) != '\n')
-    {
-        *(str + i) = c;
-        i++;
-        str = realloc(str, (i + 1) * sizeof(char));
-    }
-    *(str + i) = '\0';
+    char* str = scan_console();
     for (i = 0; i < n; i++) {
         if (strcmp (stud[i].id, str) == 0) index = i;
     }
@@ -659,20 +616,98 @@ void delete_s(FILE* fp, struct students* stud, int n){
     stud[n].surname = NULL;
     stud[n].fname = NULL;
     stud[n].faculty = NULL;
-    stud[n].spec = NULL;**/
+    stud[n].spec = NULL;
 }
 
 void refresh_s(FILE* fp, struct students* stud, int n){
-    /**stud = realloc(stud, (n) * sizeof(struct books));
+    stud = realloc(stud, (n) * sizeof(struct students));
     for (int i = 0; i < n - 1; ++i) {
         fprintf(fp, "%s;%s;%s;%s;%s;%s\n", stud[i].id, stud[i].name, stud[i].surname, stud[i].fname, stud[i].faculty, stud[i].spec);
     }
     fprintf(fp, "%s;%s;%s;%s;%s;%s", stud[n - 1].id, stud[n - 1].name, stud[n - 1].surname, stud[n - 1].fname, stud[n - 1].faculty, stud[n - 1].spec);
-    printf("Students successfully deleted\n");**/
+    printf("Students successfully deleted\n");
 }
 
-void edit_s() {
-    /****/
+void update_s(FILE* fp, struct students* stud, int n){
+    for (int i = 0; i < n - 1; ++i) {
+        fprintf(fp, "%s;%s;%s;%s;%s;%s\n", stud[i].id, stud[i].name, stud[i].surname, stud[i].fname, stud[i].faculty, stud[i].spec);
+    }
+    fprintf(fp, "%s;%s;%s;%s;%s;%s", stud[n - 1].id, stud[n - 1].name, stud[n - 1].surname, stud[n - 1].fname, stud[n - 1].faculty, stud[n - 1].spec);
+}
+
+void edit_s(struct students* stud, int n, FILE* file) {
+    int i;
+    int v;
+    int index = -1;
+    printf("Type ID of a student u want to edit\n");
+    char* str = scan_console();
+    for (i = 0; i < n; i++) {
+        if (strcmp (stud[i].id, str) == 0) index = i;
+    }
+    str = NULL;
+    if (index == -1) printf("There is not any student with this ID");
+    else {
+        fclose(file);
+        FILE* refile= fopen("students.csv", "w");
+        printf("What do u want to change ?\n");
+        printf("1. ID\n");
+        printf("2. Name\n");
+        printf("3. Surname\n");
+        printf("4. Father's name\n");
+        printf("5. Faculty\n");
+        printf("6. Specialty\n");
+        scanf("%d", &v);
+        switch (v) {
+            case 1:
+                getchar();
+                printf("Type new ID:");
+                str = scan_console();
+                stud[index].id = str;
+                update_s(refile, stud, n );
+                printf("\nInfo successfully edited\n");
+                break;
+            case 2:
+                getchar();
+                printf("Type new name:");
+                str = scan_console();
+                stud[index].name = str;
+                update_s(refile, stud, n);
+                printf("\nInfo successfully edited\n");
+                break;
+            case 3:
+                getchar();
+                printf("Type new surname:");
+                str = scan_console();
+                stud[index].surname = str;
+                update_s(refile, stud, n);
+                printf("\nInfo successfully edited\n");
+                break;
+            case 4:
+                getchar();
+                printf("Type new father's name:");
+                str = scan_console();
+                stud[index].fname = str;
+                update_s(refile, stud, n);
+                printf("\nInfo successfully edited\n");
+                break;
+            case 5:
+                getchar();
+                printf("Type new faculty:");
+                str = scan_console();
+                stud[index].faculty = str;
+                update_s(refile, stud, n);
+                printf("\nInfo successfully edited\n");
+                break;
+            case 6:
+                getchar();
+                printf("Type new specialty:");
+                str = scan_console();
+                stud[index].spec = str;
+                update_s(refile, stud, n);
+                printf("\nInfo successfully edited\n");
+                break;
+        }
+    }
 }
 
 int stud_moderator(FILE*file) {
@@ -682,18 +717,17 @@ int stud_moderator(FILE*file) {
     printf("1. Show all students\n");
     printf("2. Add a student\n");
     printf("3. Delete student\n");
-    printf("4. Edit student\n");
+    printf("4. Edit student's data\n");
     printf("5. Exit\n");
     int digit;
     struct students *stud = malloc(1 * sizeof(struct students));
     digit = quantity(file);
-    stud = input_students(stud, file, digit);
+    stud = input_students(stud, file);
     scanf("%d", &v);
     while (1) {
         switch (v) {
             case 1:
                 v = 0;
-                /**stud_sort(file, stud, digit);**/
                 show_s(stud, digit);
                 scanf("%d", &v);
                 break;
@@ -706,7 +740,7 @@ int stud_moderator(FILE*file) {
             case 3:
                 v = 0;
                 getchar();
-                delete_s(file, stud, digit);
+                delete_s(stud, digit);
                 FILE *f = fopen("students.csv", "w");
                 refresh_s(f, stud, digit - 1);
                 fclose(file);
@@ -715,7 +749,7 @@ int stud_moderator(FILE*file) {
             case 4:
                 v = 0;
                 getchar();
-                edit_s(file, stud, digit);
+                edit_s(stud, digit, file);
                 scanf("%d", &v);
                 break;
             case 5:
@@ -724,7 +758,7 @@ int stud_moderator(FILE*file) {
                     free(stud[i].name);
                     free(stud[i].surname);
                     free(stud[i].fname);
-                    free(stud[i].faculty );
+                    free(stud[i].faculty);
                     free(stud[i].spec);
                 }
                 free(stud);
