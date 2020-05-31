@@ -88,8 +88,11 @@ int index(struct users* , int, char*);
 
 int mode(char*, char*, struct users*, int);
 
+/*****************Admin***********************/
+
+int admin(FILE*, FILE*);
+
 int main() {
-    int close;
     FILE *fusers = fopen("users.csv", "r");
     FILE *file = fopen("books.csv", "a+");
     FILE *studfile = fopen("students.csv", "a+");
@@ -106,8 +109,7 @@ int main() {
             printf("Invalid login or password");
         break;
         case 1:
-            printf("\nU entered as an admin\n");
-        break;
+            return(admin(file, studfile));
         case 2:
             return (stud_moderator(studfile));
         case 3:
@@ -763,6 +765,100 @@ int stud_moderator(FILE*file) {
                 }
                 free(stud);
                 fclose(file);
+                return 0;
+        }
+    }
+}
+
+/*************************Admin****************************/
+
+int admin (FILE* lib_file, FILE* stud_file) {
+    printf("\nU entered as an admin\n\n");
+    int v;
+    printf("Choose an option :\n");
+    printf("1. Show all students\n");
+    printf("2. Add a student\n");
+    printf("3. Delete student\n");
+    printf("4. Edit student's data\n");
+    printf("5. Show all books\n");
+    printf("6. Add a book\n");
+    printf("7. Delete book\n");
+    printf("8. Find a book\n");
+    printf("9. Exit\n");
+    int digit;
+    struct students *stud = malloc(1 * sizeof(struct students));
+    digit = quantity(stud_file);
+    stud = input_students(stud, stud_file);
+    int digit_l;
+    struct books *book = malloc(1 * sizeof(struct books));
+    digit_l = quantity(lib_file);
+    book = input(book, lib_file);
+    scanf("%d", &v);
+    while (1) {
+        switch (v) {
+            case 1:
+                v = 0;
+                show_s(stud, digit);
+                scanf("%d", &v);
+                break;
+            case 2:
+                v = 0;
+                getchar();
+                input_file_s(digit + 1, stud_file, stud);
+                scanf("%d", &v);
+                break;
+            case 3:
+                v = 0;
+                getchar();
+                delete_s(stud, digit);
+                FILE *f = fopen("students.csv", "w");
+                refresh_s(f, stud, digit - 1);
+                fclose(stud_file);
+                scanf("%d", &v);
+                break;
+            case 4:
+                v = 0;
+                getchar();
+                edit_s(stud, digit, stud_file);
+                scanf("%d", &v);
+                break;
+            case 5:
+                v = 0;
+                sort(lib_file, book, digit_l);
+                show(book, digit_l);
+                scanf("%d", &v);
+                break;
+            case 6:
+                v = 0;
+                getchar();
+                input_file(digit_l + 1, lib_file, book);
+                scanf("%d", &v);
+                break;
+            case 7:
+                v = 0;
+                getchar();
+                delete(lib_file, book, digit_l);
+                FILE *fp = fopen("books.csv", "w");
+                refresh(fp, book, digit_l - 1);
+                fclose(lib_file);
+                scanf("%d", &v);
+                break;
+            case 8:
+                v = 0;
+                getchar();
+                search(lib_file, book, digit_l);
+                scanf("%d", &v);
+                break;
+            case 9:
+                for (int i = 0; i < digit_l; ++i) {
+                    free(book[i].num);
+                    free(book[i].author);
+                    free(book[i].title);
+                    free(book[i].qf);
+                    free(book[i].qt );
+                }
+                free(book);
+                fclose(lib_file);
                 return 0;
         }
     }
