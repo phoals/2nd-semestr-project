@@ -859,6 +859,16 @@ int admin (FILE* lib_file, FILE* stud_file) {
                 }
                 free(book);
                 fclose(lib_file);
+                for (int i = 0; i < digit; ++i) {
+                    free(stud[i].id);
+                    free(stud[i].name);
+                    free(stud[i].surname);
+                    free(stud[i].fname);
+                    free(stud[i].faculty);
+                    free(stud[i].spec);
+                }
+                free(stud);
+                fclose(stud_file);
                 return 0;
         }
     }
