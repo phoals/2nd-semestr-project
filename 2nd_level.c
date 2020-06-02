@@ -54,7 +54,11 @@ void shell(int , int*);
 
 char* int_to_char(int);
 
-void sort(FILE *, struct books*, int);
+void sort(struct books*, int);
+
+void update(FILE*, struct books*, int);
+
+void take(struct books*, int, FILE*);
 
 int lib_moderator(FILE*);
 
@@ -306,11 +310,10 @@ void search(FILE* fp, struct books* book, int n) {
 }
 
 int page_proofs(char* str){
-    char c = str[0];
-    int i = 1;
-    while(c != '\0'){
+    char c;
+    int i = 0;
+    while((c = str[i])!= '\0'){
         i++;
-        c = str[i];
     }
     return(i);
 }
@@ -363,7 +366,7 @@ char* int_to_char(int digit){
     return(str);
 }
 
-void sort(FILE *fp, struct books* book, int n){
+void sort(struct books* book, int n){
     char* s;
     int i = 0;
     int k = 0;
@@ -396,6 +399,41 @@ void sort(FILE *fp, struct books* book, int n){
     }
 }
 
+void update(FILE* fp, struct books* book, int n){
+    for (int i = 0; i < n - 1; ++i) {
+        fprintf(fp, "%s;%s;%s;%s;%s\n", book[i].num, book[i].author, book[i].title, book[i].qf, book[i].qt);
+    }
+    fprintf(fp, "%s;%s;%s;%s;%s", book[n - 1].num, book[n - 1].author, book[n - 1].title, book[n - 1].qf, book[n - 1].qt);
+}
+
+void take(struct books* book, int n, FILE*fp){
+    int t;
+    int i;
+    int index = -1;
+    printf("Type an ISBN of a book u want to take\n");
+    char* str = scan_console();
+    for (i = 0; i < n; i++) {
+        if (strcmp (book[i].num, str) == 0) index = i;
+    }
+    if ((index == -1) || (book[index].qf == 0)) printf("There are no free books with this ISBN");
+    else {
+        fclose(fp);
+        FILE* refile= fopen("books.csv", "w");
+        printf ("There are ");
+        printf("%s", book[index].qf);
+        printf (" free books\n");
+        printf("How many books do u want to take ?\n");
+        scanf("%d", &t);
+        int b = char_to_int(book[index].qf);
+        if (b >= t){
+            b = b - t;
+            book[index].qf = int_to_char(b);
+            update(refile, book, n);
+            printf ("Operation completed\n");
+        } else printf("There are not enough books in the library\n");
+    }
+}
+
 int lib_moderator(FILE* file) {
     printf("\nU entered as a library moderator\n\n");
     int v;
@@ -404,7 +442,8 @@ int lib_moderator(FILE* file) {
     printf("2. Add a book\n");
     printf("3. Delete book\n");
     printf("4. Find a book\n");
-    printf("5. Exit\n");
+    printf("5. Take a book\n");
+    printf("6. Exit\n");
     int digit;
     struct books *book = malloc(1 * sizeof(struct books));
     digit = quantity(file);
@@ -414,7 +453,7 @@ int lib_moderator(FILE* file) {
         switch (v) {
             case 1:
                 v = 0;
-                sort(file, book, digit);
+                sort(book, digit);
                 show(book, digit);
                 scanf("%d", &v);
                 break;
@@ -440,6 +479,12 @@ int lib_moderator(FILE* file) {
                 scanf("%d", &v);
                 break;
             case 5:
+                v = 0;
+                getchar();
+                take(book, digit, file);
+                scanf("%d", &v);
+                break;
+            case 6:
                 for (int i = 0; i < digit; ++i) {
                     free(book[i].num);
                     free(book[i].author);
@@ -784,7 +829,8 @@ int admin (FILE* lib_file, FILE* stud_file) {
     printf("6. Add a book\n");
     printf("7. Delete book\n");
     printf("8. Find a book\n");
-    printf("9. Exit\n");
+    printf("9. Take a book\n");
+    printf("10. Exit\n");
     int digit;
     struct students *stud = malloc(1 * sizeof(struct students));
     digit = quantity(stud_file);
@@ -824,7 +870,7 @@ int admin (FILE* lib_file, FILE* stud_file) {
                 break;
             case 5:
                 v = 0;
-                sort(lib_file, book, digit_l);
+                sort(book, digit_l);
                 show(book, digit_l);
                 scanf("%d", &v);
                 break;
@@ -850,6 +896,12 @@ int admin (FILE* lib_file, FILE* stud_file) {
                 scanf("%d", &v);
                 break;
             case 9:
+                v = 0;
+                getchar();
+                take(book, digit_l, lib_file);
+                scanf("%d", &v);
+                break;
+            case 10:
                 for (int i = 0; i < digit_l; ++i) {
                     free(book[i].num);
                     free(book[i].author);
