@@ -60,11 +60,15 @@ void update(FILE*, struct books*, int);
 
 void take(struct books*, int, FILE*);
 
+void edit(struct books*, int, FILE*);
+
 int lib_moderator(FILE*);
 
 /*****************Students**********************/
 
 struct students* input_students(struct students*, FILE*);
+
+void sort_s(struct students*, int);
 
 void show_s(struct students*, int);
 
@@ -171,12 +175,12 @@ void show(struct books* book, int n)
 {
     int a;
     int j = 0;
-    printf("+--------------+-------------------+-----------------+--------------+--------------+\n");
-    printf("|     ISBN     |       Author      |      Title      |     Free     |     Taken    |\n");
-    printf("+--------------+-------------------+-----------------+--------------+--------------+\n");
+    printf("+--------------+-------------------+---------------------+--------------+--------------+\n");
+    printf("|     ISBN     |       Author      |        Title        |     Free     |     Taken    |\n");
+    printf("+--------------+-------------------+---------------------+--------------+--------------+\n");
     for (int i = 0; i < n; ++i)
     {
-        printf("+--------------+-------------------+-----------------+--------------+--------------+\n");
+        printf("+--------------+-------------------+---------------------+--------------+--------------+\n");
         a = 14 - page_proofs(book[i].num);
         printf("|%s",book[i].num);
         for (j = 0; j < a; ++j) {
@@ -188,7 +192,7 @@ void show(struct books* book, int n)
             printf(" ");
         }
         printf("|%s", book[i].title);
-        a = 17 - page_proofs(book[i].title);
+        a = 21 - page_proofs(book[i].title);
         for (j = 0; j < a; ++j) {
             printf(" ");
         }
@@ -203,7 +207,7 @@ void show(struct books* book, int n)
             printf(" ");
         }
         printf("|\n");
-        printf("+--------------+-------------------+-----------------+--------------+--------------+\n");
+        printf("+--------------+-------------------+---------------------+--------------+--------------+\n");
     }
 }
 
@@ -434,6 +438,72 @@ void take(struct books* book, int n, FILE*fp){
     }
 }
 
+void edit(struct books* book, int n, FILE* file) {
+    int i;
+    int v;
+    int index = -1;
+    printf("Type ISBN of a book u want to edit\n");
+    char* str = scan_console();
+    for (i = 0; i < n; i++) {
+        if (strcmp (book[i].num, str) == 0) index = i;
+    }
+    str = NULL;
+    if (index == -1) printf("There is not any book with this ISBN");
+    else {
+        fclose(file);
+        FILE* refile= fopen("books.csv", "w");
+        printf("What do u want to change ?\n");
+        printf("1. ISB\n");
+        printf("2. Author\n");
+        printf("3. Title\n");
+        printf("4. Quantity of free\n");
+        printf("5. Quantity of taken\n");
+        scanf("%d", &v);
+        switch (v) {
+            case 1:
+                getchar();
+                printf("Type new ISBN:");
+                str = scan_console();
+                book[index].num = str;
+                update(refile, book, n);
+                printf("\nInfo successfully edited\n");
+                break;
+            case 2:
+                getchar();
+                printf("Type new author:");
+                str = scan_console();
+                book[index].author = str;
+                update(refile, book, n);
+                printf("\nInfo successfully edited\n");
+                break;
+            case 3:
+                getchar();
+                printf("Type new title:");
+                str = scan_console();
+                book[index].title = str;
+                update(refile, book, n);
+                printf("\nInfo successfully edited\n");
+                break;
+            case 4:
+                getchar();
+                printf("Type new quantity of free:");
+                str = scan_console();
+                book[index].qf = str;
+                update(refile, book, n);
+                printf("\nInfo successfully edited\n");
+                break;
+            case 5:
+                getchar();
+                printf("Type new quantity of taken:");
+                str = scan_console();
+                book[index].qt = str;
+                update(refile, book, n);
+                printf("\nInfo successfully edited\n");
+                break;
+        }
+    }
+}
+
 int lib_moderator(FILE* file) {
     printf("\nU entered as a library moderator\n\n");
     int v;
@@ -443,7 +513,8 @@ int lib_moderator(FILE* file) {
     printf("3. Delete book\n");
     printf("4. Find a book\n");
     printf("5. Take a book\n");
-    printf("6. Exit\n");
+    printf("6. Edit a book\n");
+    printf("7. Exit\n");
     int digit;
     struct books *book = malloc(1 * sizeof(struct books));
     digit = quantity(file);
@@ -485,6 +556,12 @@ int lib_moderator(FILE* file) {
                 scanf("%d", &v);
                 break;
             case 6:
+                v = 0;
+                getchar();
+                edit(book, digit, file);
+                scanf("%d", &v);
+                break;
+            case 7:
                 for (int i = 0; i < digit; ++i) {
                     free(book[i].num);
                     free(book[i].author);
@@ -569,6 +646,42 @@ struct students* input_students(struct students* stud, FILE* fp) {
         stud = realloc(stud, (i + 1) * sizeof(struct students));
     }
     return(stud);
+}
+
+void sort_s(struct students* stud, int n){
+    char* s;
+    int i = 0;
+    int k = 0;
+    int* num = malloc(n * sizeof(int));
+    for (i = 0; i < n; ++i) {
+        num[i] = char_to_int(stud[i].id);
+    }
+    shell(n, num);
+    for (i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (strcmp(int_to_char(num[i]), stud[j].id) == 0) {
+                s = stud[k].id;
+                stud[k].id = stud[j].id;
+                stud[j].id = s;
+                s = stud[k].name;
+                stud[k].name = stud[j].name;
+                stud[j].name = s;
+                s = stud[k].surname;
+                stud[k].surname = stud[j].surname;
+                stud[j].surname = s;
+                s = stud[k].fname;
+                stud[k].fname = stud[j].fname;
+                stud[j].fname = s;
+                s = stud[k].faculty;
+                stud[k].faculty = stud[j].faculty;
+                stud[j].faculty = s;
+                s = stud[k].spec;
+                stud[k].spec = stud[j].spec;
+                stud[j].spec = s;
+            }
+        }
+        k++;
+    }
 }
 
 void show_s(struct students* stud, int n)
@@ -775,6 +888,7 @@ int stud_moderator(FILE*file) {
         switch (v) {
             case 1:
                 v = 0;
+                sort_s(stud, digit);
                 show_s(stud, digit);
                 scanf("%d", &v);
                 break;
@@ -821,16 +935,19 @@ int admin (FILE* lib_file, FILE* stud_file) {
     printf("\nU entered as an admin\n\n");
     int v;
     printf("Choose an option :\n");
+    printf("--------Students--------\n");
     printf("1. Show all students\n");
     printf("2. Add a student\n");
     printf("3. Delete student\n");
     printf("4. Edit student's data\n");
+    printf("---------Books---------\n");
     printf("5. Show all books\n");
     printf("6. Add a book\n");
     printf("7. Delete book\n");
     printf("8. Find a book\n");
     printf("9. Take a book\n");
-    printf("10. Exit\n");
+    printf("10. Edit a book\n");
+    printf("11. Exit\n");
     int digit;
     struct students *stud = malloc(1 * sizeof(struct students));
     digit = quantity(stud_file);
@@ -844,6 +961,7 @@ int admin (FILE* lib_file, FILE* stud_file) {
         switch (v) {
             case 1:
                 v = 0;
+                sort_s(stud, digit);
                 show_s(stud, digit);
                 scanf("%d", &v);
                 break;
@@ -902,6 +1020,12 @@ int admin (FILE* lib_file, FILE* stud_file) {
                 scanf("%d", &v);
                 break;
             case 10:
+                v = 0;
+                getchar();
+                edit(book, digit_l, lib_file);
+                scanf("%d", &v);
+                break;
+            case 11:
                 for (int i = 0; i < digit_l; ++i) {
                     free(book[i].num);
                     free(book[i].author);
