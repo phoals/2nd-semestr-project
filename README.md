@@ -1,2 +1,2 @@
 # 2nd-semestr-project
-Simple database realized by structures and files with C language durning semester task. Database includes verification system. You can enter either admin, library moderator or student moderator. Each of library or student modes has functions, which you can use to edit database. Admin mode includes both library and student functions.
+Simple database realized by structures and files with C language durning semester task. Database includes verification system. You can enter either admin, library moderator or student moderator. Each of library or student modes has functions, which you can use to edit database. Admin mode includes both library and student functions. Every memory allocation is dynamic, for sort i used shell sorrting.
